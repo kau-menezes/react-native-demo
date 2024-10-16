@@ -4,29 +4,14 @@ import React from "react";
 
 const data = [
     {
-        "year": "2018",
-        "name": "Ultra Violet",
-        "hexa": "#5F4B8C"
+        "year": "2024",
+        "name": "Peach Fuzz",
+        "hexa": "#FFBE98" 
     },
     {
-        "year": "2019",
-        "name": "Living Coral",
-        "hexa": "#FF6F61"
-    },
-    {
-        "year": "2020",
-        "name": "Classic Blue",
-        "hexa": "#0E4C92"
-    },
-    {
-        "year": "2021",
-        "name": "Ultimate Gray",
-        "hexa": "#A7A8AA"
-    },
-    {
-        "year": "2021",
-        "name": "Illuminating",
-        "hexa": "#F6EB61"
+        "year": "2023",
+        "name": "Viva Magenta",
+        "hexa": "#BE3455"
     },
     {
         "year": "2022",
@@ -34,16 +19,32 @@ const data = [
         "hexa": "#6868AC"
     },
     {
-        "year": "2023",
-        "name": "Viva Magenta",
-        "hexa": "#D50032"
+        "year": "2021",
+        "name": "Illuminating",
+        "hexa": "#F6EB61"
     },
     {
-        "year": "2024",
-        "name": "Apricot Crush",
-        "hexa": "#F4B05A" 
+        "year": "2021",
+        "name": "Ultimate Gray",
+        "hexa": "#A7A8AA"
+    },
+    {
+        "year": "2020",
+        "name": "Classic Blue",
+        "hexa": "#0E4C92"
+    },
+    {
+        "year": "2019",
+        "name": "Living Coral",
+        "hexa": "#FF6F61"
+    },
+    {
+        "year": "2018",
+        "name": "Ultra Violet",
+        "hexa": "#5F4B8C"
     }
-]
+];
+
 
 
 export default function List()  {
@@ -54,15 +55,15 @@ export default function List()  {
             contentContainerStyle={styledList.list}
                 data={data} 
                 renderItem={({ item }) => {
-                    // Use item.id as textColor
-                    const textColor = item.hexa; // Here we use item.id as the color
+
+                    const textColor = item.hexa; 
                     return (
-                        <View style={styles({ textColor}).view}>
+                        <View style={styles({ textColor }).view}>
                             <View style={styles({ textColor }).item}></View>
                             <View>
-                                <Text style={styles({ textColor}).title} >PANTONE</Text>
-                                <Text style={styles({ textColor}).color}>{item.hexa}</Text>
-                                <Text style={styles({ textColor}).color}>{item.name}</Text>
+                                <Text style={styles({ textColor }).title} >PANTONE</Text>
+                                <Text style={styles({ textColor }).color}>{item.hexa}</Text>
+                                <Text style={styles({ textColor }).color}>{item.name}</Text>
                             </View>
                         </View>
                     );
@@ -98,6 +99,7 @@ const styles = ({ textColor } : { textColor: string }) => StyleSheet.create({
         width: 200,
         paddingLeft: 10,
         fontWeight: 400,
+        fontFamily: 'Helvetica', // Regular Helvetica
     },
 
     view: {

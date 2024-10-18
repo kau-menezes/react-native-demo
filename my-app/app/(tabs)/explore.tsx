@@ -1,9 +1,20 @@
-import { StyleSheet, Image, Text } from 'react-native';
+import { StyleSheet, Image, Text, SafeAreaView } from 'react-native';
+
+const data = [
+  {
+    "name": "name",
+    "image": "../../assets/images/react-logo.png"
+  }
+]
+
 
 export default function TabTwoScreen() {
   return (
     <>
+    <SafeAreaView>
       <Text>expolre ta tabs</Text>
+      
+    </SafeAreaView>
     </>
   );
 }

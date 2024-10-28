@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -12,19 +12,42 @@ import { Image } from "expo-image";
 
 import { Link, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { FIREBASE_AUTH } from "@/firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  //   const [count, setCount] = useState(0);
-  //   const onPress = () => setCount(prevCount => prevCount + 1);
+  const auth = FIREBASE_AUTH;
+
+  useEffect(() => {
+    console.log(auth.currentUser);
+    
+  }, [auth.currentUser]);
+
+  useEffect(() => {
+    console.log(email, password);
+    
+  }, [email, password]);
+
   const logIn = () => {
-    router.push("/(tabs)");
+    // router.push("/(tabs)");
+
+    signInWithEmailAndPassword(auth, email, password)
+    .then((data) => {
+      console.log(data);
+      router.push('/(tabs)')
+      
+    })
+    .catch( (err) => {
+      alert(err.message);
+    })
+
   };
 
   const registerAccount = () => {
-    router.push("/");
+    router.push("/register");
   };
 
   console.log(email, password);

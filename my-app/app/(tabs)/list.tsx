@@ -1,7 +1,14 @@
 import { FlatList } from "react-native-gesture-handler";
-import { Text,StyleSheet, TextStyle, StyleProp, View } from "react-native";
-import { Image } from "expo-image";
-import React from "react";
+import { Text, StyleSheet, View } from "react-native";
+import { useEffect, useState } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { FIREBASE_DB } from "@/firebaseConfig";
+import Card from "@/components/Card";
+
+interface Color {
+    name: string;
+    hexa: string;
+}
 
 const data = [
     {
@@ -54,76 +61,48 @@ const data = [
     }
 ];
 
+export default function List() {
+    const [colors, setColors] = useState<Color[]>([]);
 
+    useEffect(() => {
+        // Subscribe to the 'colors' collection
+        const unsubscribe = onSnapshot(collection(FIREBASE_DB, 'colors'), (snapshot) => {
+            const colorsList = snapshot.docs.map(doc => doc.data() as Color);
+            console.log("Fetched colors:", colorsList);
+            setColors(colorsList); // Update state with the fetched data
+        }, (error) => {
+            console.error("Error fetching colors:", error);
+        });
 
-export default function List()  {
+        // Cleanup subscription on component unmount
+        return () => unsubscribe();
+    }, []);
 
-    return(
-        <>
+    console.log("Colors state:", colors);
+
+    return (
+        <View style={styledList.container}>
             <FlatList 
-            contentContainerStyle={styledList.list}
-                data={data} 
+                contentContainerStyle={styledList.list}
+                data={colors} 
                 renderItem={({ item }) => {
-
-                    const textColor = item.hexa; 
                     return (
-                        <View style={styles({ textColor }).view}>
-                            <View style={styles({ textColor }).item}></View>
-                            <View>
-                                <Text style={styles({ textColor }).title} >PANTONE</Text>
-                                <Text style={styles({ textColor }).color}>{item.hexa}</Text>
-                                <Text style={styles({ textColor }).color}>{item.name}</Text>
-                                {/* <Image style={styles({ textColor }).image} source={item.image}/> */}
-                            </View>
-                        </View>
+                        <Card color={{ name: item.name, hexa: item.hexa, textColor: item.hexa }} />
+                        // <Text style={{ color: item.hexa }}>{item.hexa} {item.name}</Text>
                     );
                 }} 
-                keyExtractor={item => `${item.year}-${item.name}`} 
+                keyExtractor={(item, index) => `${item.name}-${index}`} // Use index for uniqueness
             />
-        </>
-    )
+        </View>
+    );
 }
 
-const styles = ({ textColor } : { textColor: string }) => StyleSheet.create({
-    item: {
-        backgroundColor: textColor,
-        width: 200,
-        padding: 10,
-        fontWeight: 600,
-        height: 200,
-        maxWidth: 200
-    },
-
-    title: {
-        backgroundColor: "#FFFFFF",
-        color: "#000000",
-        width: 200,
-        paddingLeft: 10,
-        fontWeight: 700,
-        fontSize: 20
-    },
-
-    color: {
-        backgroundColor: "#FFFFFF",
-        color: "#000000",
-        width: 200,
-        paddingLeft: 10,
-        fontWeight: 400,
-        fontFamily: 'Helvetica', // Regular Helvetica
-    },
-
-    view: {
-        padding: 10,
-        backgroundColor: "#FFFFFF",
-    },
-
-    image: {
-        width: 30,
-        height: 30
-    }
-});
-
 const styledList = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
     list: {
         display: "flex",
         flexDirection: "column",
@@ -134,4 +113,4 @@ const styledList = StyleSheet.create({
         marginBottom: 50,
         flexWrap: "wrap"
     }
-})
+});

@@ -10,10 +10,9 @@ import {
 
 import { Image } from "expo-image";
 
-import { Link, router } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { FIREBASE_AUTH } from "@/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { router } from "expo-router";
 
 export default function Login() {
   const [email, setEmail] = useState("");

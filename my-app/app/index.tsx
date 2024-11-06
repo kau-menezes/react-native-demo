@@ -1,254 +1,282 @@
-import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  TextInput,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import Row from "@/components/Row";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+import { SafeAreaView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import WideButton from "@/components/WideButton";
 
-import { Image } from "expo-image";
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
 
-import { FIREBASE_AUTH } from "@/firebaseConfig";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { router } from "expo-router";
-
-export default function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const auth = FIREBASE_AUTH;
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    Candal: require("../assets/fonts/Candal-Regular.ttf"),
+  });
 
   useEffect(() => {
-    console.log(auth.currentUser);
-    
-  }, [auth.currentUser]);
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
 
-  useEffect(() => {
-    console.log(email, password);
-    
-  }, [email, password]);
+  if (!loaded && !error) {
+    // Show a loading spinner until fonts are loaded
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
 
-  const logIn = () => {
-    // router.push("/(tabs)");
+  if (error) {
+    // Handle font loading error
+    return <Text>Error loading fonts</Text>;
+  }
 
-    signInWithEmailAndPassword(auth, email, password)
-    .then((data) => {
-      console.log(data);
-      router.push('/(tabs)')
-      
-    })
-    .catch( (err) => {
-      alert(err.message);
-    })
+  const [first, setFirst] = useState("");
 
+  // Function to handle the button press
+  const handlePress = (value: string) => {
+    // If DEL is pressed, remove the last character
+    if (value === "DEL") {
+      setFirst(first.slice(0, -1));
+    }
+    // If RESET is pressed, clear the input
+    else if (value === "RESET") {
+      setFirst("");
+    }
+    // If = is pressed, evaluate the expression
+    else if (value === "=") {
+      try {
+        setFirst(eval(first).toString()); // Evaluates the expression
+      } catch (e) {
+        setFirst("Error");
+      }
+    }
+    // Otherwise, concatenate the value to the current input
+    else {
+      setFirst(first + value);
+    }
   };
-
-  const registerAccount = () => {
-    router.push("/register");
-  };
-
-  console.log(email, password);
-  console.log(typeof email, typeof password);
 
   return (
-    <>
-      <View style={viewStyle.headerBackground}>
-        <View style={viewStyle.header}>RECIEVE OUR NEWSLETTER</View>
-        <Image
-          style={styles.image}
-          source={"../assets/images/pantone-logo.png"}
-        />
-      </View>
-      <View style={viewStyle.view}>
-        <View>
-          <Text style={styles.title}>MY PANTONE ACCOUNT</Text>
-          <Text style={styles.subtitle}>Log into yout Pantone.com account</Text>
-        </View>
-        <Text style={styles.text}>
-          E-mail<Text style={styles.mandatory}>*</Text>
-        </Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Type your e-mail..."
-          keyboardType="email-address"
-          onChangeText={setEmail}
-          value={email}
-        />
-        <Text style={styles.text}>
-          Password<Text style={styles.mandatory}>*</Text>
-        </Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={setPassword}
-          value={password}
-          placeholder="Type your password..."
-          keyboardType="numeric"
-        />
-        <View style={styles.flex}>
-          <Text style={styles.secondaryText}>Remember Me</Text>
-          <Text style={styles.secondaryText}>Forgot my Passord</Text>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={logIn}>
-          <Text style={styles.buttonText}>ENTER</Text>
-        </TouchableOpacity>
-        <View>
-          <Text style={styles.title}>CREATE MY ACCOUNT</Text>
-          <Text style={styles.subtitle}>
-            You can register to become a customer during the checkout process.
-          </Text>
-        </View>
-        <TouchableOpacity style={styles.button} onPress={registerAccount}>
-          <Text style={styles.buttonText}>CREATE AN ACCOUNT</Text>
-        </TouchableOpacity>
-
-        {/* <View>
-            <LinearGradient
-                // Background Linear Gradient
-                colors={['rgba(0,0,0,0.8)', 'transparent']}
-                style={viewStyle.background}
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.container}>
+        <View style={styles.baseCalculator}>
+          <View style={styles.resultContainer}>
+            <Text style={styles.result}>{first}</Text>
+          </View>
+          <View style={styles.miniContainer}>
+            <Row
+              btn1="7"
+              btn2="8"
+              btn3="9"
+              btn4="DEL"
+              btn4Color="#64719B"
+              btn4ShadowColor="#384462"
+              btn4TextColor="#FFFFFF"
+              onPress={handlePress}
             />
-        </View> */}
+            <Row btn1="4" btn2="5" btn3="6" btn4="+" onPress={handlePress} />
+            <Row btn1="1" btn2="2" btn3="3" btn4="-" onPress={handlePress} />
+            <Row btn1="." btn2="0" btn3="÷" btn4="x" onPress={handlePress} />
+            <View style={styles.wideButtonContainer}>
+              <WideButton
+                value="="
+                color="#D13F30"
+                textColor="#FFFFFF"
+                shadowColor="#94261B"
+                onPress={handlePress}
+              />
+              <WideButton
+                value="RESET"
+                color="#64719B"
+                shadowColor="#384462"
+                textColor="#FFFFFF"
+                onPress={handlePress}
+              />
+            </View>
+          </View>
+        </View>
       </View>
-      <View style={viewStyle.footer}>
-        <Text style={viewStyle.footerHeader}>Newsletter</Text>
-        <Text style={viewStyle.footerText}>
-          Stay up to date on new products, color trend reports, webinars,
-          special offers and more.
-        </Text>
-      </View>
-    </>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    height: 40,
-    marginBottom: 12,
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 4,
-    borderColor: "#e3e3e3",
-    fontFamily: "Nunitinho", // Regular Helvetica
-    color: "#a8a8a8",
+  safe: {
+    flex: 1,
+    width: "100%",
   },
 
-  button: {
+  container: {
+    backgroundColor: "#3B4664",
+    flex: 1, // This makes the container take up 90% of the available height
+    justifyContent: "center", // Centers content vertically
+    alignItems: "center", // Centers content horizontally
+    width: "100%",
+  },
+
+  baseCalculator: {
+    minHeight: "50%",
+    justifyContent: "space-between",
+    width: "85%",
+    gap: 10,
+  },
+
+  miniContainer: {
+    display: "flex",
+    justifyContent: "space-around",
+    height: 330,
+    backgroundColor: "#252D44",
+    flex: 7,
+    width: "100%",
+    borderRadius: 8,
+  },
+
+  resultContainer: {
+    backgroundColor: "#252D44",
+    flex: 2,
+    borderRadius: 8,
+  },
+
+  result: {
+    display: "flex",
     alignItems: "center",
-    backgroundColor: "#000000",
-    padding: 10,
-    borderRadius: 4,
+    justifyContent: "flex-end",
+    paddingRight: "10%",
+    fontFamily: "Candal",
+    fontWeight: 400,
+    fontStyle: "normal",
+    color: "#EAE3DB",
+    fontSize: 30,
+    width: "100%",
+    height: "100%",
   },
 
-  buttonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-  },
-
-  text: {
-    fontFamily: "Nunitinho",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginVertical: 20,
-  },
-
-  subtitle: {
-    fontFamily: "Nunitinho",
-    fontWeight: "600",
-    fontSize: 14,
-    marginBottom: 20,
-  },
-
-  mandatory: {
-    color: "#FF4D4F",
-  },
-
-  flex: {
+  wideButtonContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-  },
-
-  secondaryText: {
-    fontFamily: "Nunitinho",
-    fontWeight: "600",
-    fontSize: 14,
-    margin: 5,
-    // width: "50%"
-  },
-
-  image: {
-    width: 150,
-    height: 30,
-    margin: 10,
+    paddingHorizontal: 10,
   },
 });
 
-const viewStyle = StyleSheet.create({
-  view: {
-    backgroundColor: "#FFFFFF",
-    height: "80%",
-    padding: "10%",
-  },
 
-  footer: {
-    backgroundColor: "#000000",
-    color: "#FFFFFF",
-    fontFamily: "Nunitinho",
-    padding: 4,
-    fontSize: 16,
-    width: "100%",
-    height: "20%"
-  },
+// import Row from '@/components/Row';
+// import { useFonts } from 'expo-font';
+// import * as SplashScreen from 'expo-splash-screen';
+// import { useEffect, useState } from 'react';
+// import 'react-native-reanimated';
+// import {
+//   SafeAreaView,
+//   StyleSheet,
+//   TextInput,
+//   Text,
+//   TouchableOpacity,
+//   View,
+//   ActivityIndicator,
+// } from "react-native";
+// import WideButton from '@/components/WideButton';
 
-  footerText: {
-    backgroundColor: "#000000",
-    color: "#FFFFFF",
-    fontFamily: "Nunitinho",
-    padding: 4,
-    fontSize: 16,
-    width: "100%",
-  },
+// // Prevent the splash screen from auto-hiding before asset loading is complete.
+// SplashScreen.preventAutoHideAsync();
 
-  footerHeader: {
-    backgroundColor: "#000000",
-    color: "#FFFFFF",
-    fontFamily: "Nunitinho",
-    padding: 4,
-    fontSize: 24,
-    fontWeight: "800",
-    width: "100%",
-  },
+// export default function RootLayout() {
 
-  background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    height: 300,
-  },
+//   const [loaded, error] = useFonts({
+//     // Candal: require("@/assets/fonts/Candal-Regular.ttf"),
+//     Candal: require("../assets/fonts/Candal-Regular.ttf"),
 
-  header: {
-    backgroundColor: "#000000",
-    color: "#FFFFFF",
-    fontFamily: "Nunitinho",
-    textAlign: "center",
-    padding: 4,
-    fontSize: 12,
-    width: "100%",
-    height: "30%"
-  },
+//   });
 
-  headerBackground: {
-    backgroundColor: "#FFFFFF",
-    display: "flex",
-    alignItems: "center",
-    width: "100%",
-  },
-});
+//   useEffect(() => {
+//     if (loaded || error) {
+//       SplashScreen.hideAsync();
+//     }
+//   }, [loaded, error]);
+
+//   if (!loaded && !error) {
+//     // Show a loading spinner until fonts are loaded
+//     return <ActivityIndicator size="large" color="#0000ff" />;
+//   }
+
+//   if (error) {
+//     // Handle font loading error
+//     return <Text>Error loading fonts</Text>;
+//   }
+
+//   const [first, setfirst] = useState();
+
+//     return (    
+//     <View style={styles.safe} >
+//       <View style={styles.container}>
+//         <View style={styles.baseCalculator}>
+//           <View style={styles.resultContainer}>
+//               <Text style={styles.result}>{first}</Text>
+//           </View>
+//           <View style={styles.miniContainer}>
+//               <Row btn1={"7"} btn2={"8"} btn3={"9"} btn4={"DEL"} btn4Color='#64719B' btn4ShadowColor='#384462' btn4TextColor='#FFFFFF'></Row>
+//               <Row btn1={"4"} btn2={"5"} btn3={"6"} btn4={"+"}></Row>
+//               <Row btn1={"1"} btn2={"2"} btn3={"3"} btn4={"-"}></Row>
+//               <Row btn1={"."} btn2={"0"} btn3={"÷"} btn4={"x"}></Row>
+//               <View style={{display: "flex", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10}}>
+//                 <WideButton value='=' color='#D13F30' textColor='#FFFFFF' shadowColor='#94261B'></WideButton>
+//                 <WideButton value='RESET' color='#64719B' shadowColor='#384462' textColor='#FFFFFF'></WideButton>
+//               </View>
+//           </View>
+//         </View>
+//         {/* <Text style={{ fontFamily: 'Candal' }}>This text will use the Candal font</Text> */}
+//       </View>
+//       </View>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   baseCalculator: {
+//     minHeight: "50%",
+//     justifyContent: "space-between",
+//     width: "85%",
+//     gap: 10
+//   },
+
+//   safe: {
+//     flex: 1,
+//     width: "100%",
+//   },  
+
+//   miniContainer: {
+//     display: "flex",
+//     justifyContent: "space-around",
+//     height: 330,
+//     backgroundColor:"#252D44",
+//     flex: 7,
+//     width: "100%",
+//     borderRadius: 8
+//   },
+
+//   resultContainer: {
+//     backgroundColor: "#252D44",
+//     flex: 2,
+//     borderRadius: 8
+
+//   },
+
+//   result: {
+//     display: "flex",
+//     alignItems: "center",
+//     justifyContent: "flex-end",
+//     paddingRight: "10%",
+//     fontFamily: "Candal",
+//     fontWeight: 400,
+//     fontStyle: "normal",
+//     color: "#EAE3DB",
+//     fontSize: 30,
+//     width: "100%",
+//     height: "100%",
+//   },
+  
+//   container: {
+//     backgroundColor: "#3B4664",
+//     flex: 1, // This makes the container take up 90% of the available height
+//     justifyContent: 'center', // Centers content vertically
+//     alignItems: 'center', // Centers content horizontally
+//     width: "100%",
+//   },
+// })
